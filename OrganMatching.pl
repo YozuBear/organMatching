@@ -43,7 +43,8 @@ blood_type_match(o, R):- blood_type(R).
 % Recipient and donor in same city (+3 points)
 
 
-% Kidneys storage must be within 30 hrs, fresher kidney is preferred.
+% Living donor? 
+% Transplant outcomes are generally better with kidneys from living donors than for kidneys from deceased donors. 
 
 
 % Assigning kidneys to different patients
