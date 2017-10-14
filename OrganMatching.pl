@@ -1,4 +1,5 @@
-% General Matching for all organs transplant
+% Section A: Create the ranking of kidneys for each recipient.
+% Blood type must match
 % Blood matching: http://www.ucdmc.ucdavis.edu/transplant/livingdonation/donor_compatible.html
 % If your blood type is: 	You can donate to these blood types:
 % 	TYPE O					TYPE O, A, B, AB
@@ -34,10 +35,11 @@ blood_type_match(o, R):- blood_type(R).
 % by helping donor cells engraft (make new blood cells) and reduce the risks of immune cells from 
 % the donated organ cells (the graft) attack the recipient’s cells.
 % A, B, DR antigens are the most relevant for renal transplant
-% There are 78 types of DR antigens, will use the common 10 antigens here for simplicity.
+% There are 78 types of DR antigens, will use the common 28 antigens here for simplicity.
+% There are more than 2000 known allels for type A antigens, for simplicity, use 100 for both A and B.
 
 % Every person has two A, two B, and two DR antigens inheritted from the parents.
-% Each match of antigen with donor (+1 points)
+% Each match of antigen with donor (+1 point)
 
 
 % Recipient and donor in same city (+3 points)
@@ -47,7 +49,7 @@ blood_type_match(o, R):- blood_type(R).
 % Transplant outcomes are generally better with kidneys from living donors than for kidneys from deceased donors. 
 
 
-% Assigning kidneys to different patients
+% Section B: Assigning kidneys to different recipients based on highest ranking of section A.
 
 % Children under 5 are given priority (+4 points)
 % Patients between age of 5~17 given priority (+2 points)
