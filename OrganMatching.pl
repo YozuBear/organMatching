@@ -1,4 +1,4 @@
-% Section A: Create the ranking of kidneys for each recipient.
+% Section A: create a list of matching kidneys to patients based on blood type.
 % Blood type must match
 % Blood matching: http://www.ucdmc.ucdavis.edu/transplant/livingdonation/donor_compatible.html
 % If your blood type is: 	You can donate to these blood types:
@@ -17,7 +17,9 @@ blood_type(o).
 % Where D is the blood type of donor, R is blood type of recipient.
 
 % same blood type always match
-blood_type_match(A,A):- blood_type(A).
+% blood_type_match(A,A):- blood_type(A).  % to avoid overlapping results
+blood_type_match(a,a).
+blood_type_match(b,b).
 
 % recipient with blood type AB is universal recipient
 blood_type_match(D,ab):- blood_type(D).
@@ -26,6 +28,16 @@ blood_type_match(D,ab):- blood_type(D).
 blood_type_match(o, R):- blood_type(R).
 
 % TODO: overlapping answers in blood type
+
+% Given a recipient (ID), return list of compatible kidney IDs based on blood type
+% matching_blood_type_ID(RecipientID, KidneyID)
+matching_blood_type_ID(RecipientID, KidneyID):- 
+prop(RecipientID,recipient_blood_type, R),
+prop(KidneyID, donor_blood_type, D), 
+blood_type_match(D,R).
+
+
+% Section B: Create the ranking of kidneys for each recipient.
 
 % http://www.ucdmc.ucdavis.edu/transplant/learnabout/learn_hla_type_match.html
 % https://bethematch.org/patients-and-families/before-transplant/find-a-donor/hla-matching/
@@ -45,11 +57,11 @@ blood_type_match(o, R):- blood_type(R).
 % Recipient and donor in same city (+3 points)
 
 
-% Living donor? 
+% Living donor? (+2 points)
 % Transplant outcomes are generally better with kidneys from living donors than for kidneys from deceased donors. 
 
 
-% Section B: Assigning kidneys to different recipients based on highest ranking of section A.
+% Section C: Assigning kidneys to different recipients based on highest ranking of section A.
 
 % Children under 5 are given priority (+4 points)
 % Patients between age of 5~17 given priority (+2 points)
