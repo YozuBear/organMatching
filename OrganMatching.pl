@@ -52,6 +52,12 @@ blood_type_match(D,R).
 % Each match of antigen with donor (+1 point)
 % hlaMatch(RecipientID, KidneyID, Points)
 
+%findall(K, rank_kidney(recipient_8, K), L), keysort(L, Sorted).
+rank_kidney(RecipientID, Score-KidneyID):- 
+matching_blood_type_ID(RecipientID, KidneyID),
+score(RecipientID, KidneyID, Score).
+
+% Add up the score to rank kidneys for each recipient.
 score(RecipientID, KidneyID, S):- 
 hlaMatch_a1(RecipientID, KidneyID, P1),
 hlaMatch_a2(RecipientID, KidneyID, P2),
@@ -59,7 +65,9 @@ hlaMatch_b1(RecipientID, KidneyID, P3),
 hlaMatch_b2(RecipientID, KidneyID, P4),
 hlaMatch_dr1(RecipientID, KidneyID, P5),
 hlaMatch_dr2(RecipientID, KidneyID, P6),
-S is P1+P2+P3+P4+P5+P6.
+same_city_match(RecipientID, KidneyID, P7),
+living_donor(KidneyID, P8),
+S is P1+P2+P3+P4+P5+P6+P7+P8.
 
 hlaMatch_a1(RecipientID, KidneyID, 1):- 
 prop(RecipientID,recipient_HLA_A1, A),
@@ -116,11 +124,22 @@ prop(KidneyID, donor_HLA_DR2, B),
 dif(A,B).
 
 % Recipient and donor in same city (+3 points)
+same_city_match(RecipientID, KidneyID, 3):- 
+prop(RecipientID,recipient_city, A),
+prop(KidneyID, donor_city, A).
 
+same_city_match(RecipientID, KidneyID, 0):- 
+prop(RecipientID,recipient_city, A),
+prop(KidneyID, donor_city, B),
+dif(A,B).
 
 % Living donor? (+2 points)
 % Transplant outcomes are generally better with kidneys from living donors than for kidneys from deceased donors. 
+living_donor(KidneyID, 2):- 
+prop(KidneyID, donor_live, 1).
 
+living_donor(KidneyID, 0):- 
+prop(KidneyID, donor_live, 0).
 
 % Section C: Assigning kidneys to different recipients based on highest ranking of section A.
 
