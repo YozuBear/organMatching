@@ -27,8 +27,6 @@ blood_type_match(D,ab):- blood_type(D).
 % donor with blood type O is universal donor.
 blood_type_match(o, R):- blood_type(R).
 
-% TODO: overlapping answers in blood type
-
 % Given a recipient (ID), return list of compatible kidney IDs based on blood type
 % matching_blood_type_ID(RecipientID, KidneyID)
 matching_blood_type_ID(RecipientID, KidneyID):- 
@@ -52,7 +50,70 @@ blood_type_match(D,R).
 
 % Every person has two A, two B, and two DR antigens inheritted from the parents.
 % Each match of antigen with donor (+1 point)
+% hlaMatch(RecipientID, KidneyID, Points)
 
+score(RecipientID, KidneyID, S):- 
+hlaMatch_a1(RecipientID, KidneyID, P1),
+hlaMatch_a2(RecipientID, KidneyID, P2),
+hlaMatch_b1(RecipientID, KidneyID, P3),
+hlaMatch_b2(RecipientID, KidneyID, P4),
+hlaMatch_dr1(RecipientID, KidneyID, P5),
+hlaMatch_dr2(RecipientID, KidneyID, P6),
+S is P1+P2+P3+P4+P5+P6.
+
+hlaMatch_a1(RecipientID, KidneyID, 1):- 
+prop(RecipientID,recipient_HLA_A1, A),
+prop(KidneyID, donor_HLA_A1, A).
+
+hlaMatch_a1(RecipientID, KidneyID, 0):- 
+prop(RecipientID,recipient_HLA_A1, A),
+prop(KidneyID, donor_HLA_A1, B),
+dif(A,B).
+
+hlaMatch_a2(RecipientID, KidneyID, 1):- 
+prop(RecipientID,recipient_HLA_A2, A),
+prop(KidneyID, donor_HLA_A2, A).
+
+hlaMatch_a2(RecipientID, KidneyID, 0):- 
+prop(RecipientID,recipient_HLA_A2, A),
+prop(KidneyID, donor_HLA_A2, B),
+dif(A,B).
+
+hlaMatch_b1(RecipientID, KidneyID, 1):- 
+prop(RecipientID,recipient_HLA_B1, A),
+prop(KidneyID, donor_HLA_B1, A).
+
+hlaMatch_b1(RecipientID, KidneyID, 0):- 
+prop(RecipientID,recipient_HLA_B1, A),
+prop(KidneyID, donor_HLA_B1, B),
+dif(A,B).
+
+hlaMatch_b2(RecipientID, KidneyID, 1):- 
+prop(RecipientID,recipient_HLA_B2, A),
+prop(KidneyID, donor_HLA_B2, A).
+
+hlaMatch_b2(RecipientID, KidneyID, 0):- 
+prop(RecipientID,recipient_HLA_B2, A),
+prop(KidneyID, donor_HLA_B2, B),
+dif(A,B).
+
+hlaMatch_dr1(RecipientID, KidneyID, 1):- 
+prop(RecipientID,recipient_HLA_DR1, A),
+prop(KidneyID, donor_HLA_DR1, A).
+
+hlaMatch_dr1(RecipientID, KidneyID, 0):- 
+prop(RecipientID,recipient_HLA_DR1, A),
+prop(KidneyID, donor_HLA_DR1, B),
+dif(A,B).
+
+hlaMatch_dr2(RecipientID, KidneyID, 1):- 
+prop(RecipientID,recipient_HLA_DR2, A),
+prop(KidneyID, donor_HLA_DR2, A).
+
+hlaMatch_dr2(RecipientID, KidneyID, 0):- 
+prop(RecipientID,recipient_HLA_DR2, A),
+prop(KidneyID, donor_HLA_DR2, B),
+dif(A,B).
 
 % Recipient and donor in same city (+3 points)
 
