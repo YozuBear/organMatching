@@ -167,6 +167,18 @@ prop(KidneyID, donor_live, 0).
 % Section C: Assigning kidneys to different recipients based on highest ranking of section A.
 
 % Rank the recipients based on recipient's score.
+% rank_recipients(RecipientsIDList, RankedRecipientsIDList).
+rank_recipients(K, RankedList):- 
+scoreRecipient(K, S),
+rank(S, RankedList).
+
+
+% Create recipient lists with score.
+% scoreRecipient(RecipientsIDList, ScoreRecipientList).
+scoreRecipient([], []).
+scoreRecipient([H|T], [S-H|L]):-
+recipient_score(H, S),
+scoreRecipient(T, L).
 
 
 % Calculate the recipient's score to kidneys
