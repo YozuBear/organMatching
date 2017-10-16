@@ -30,9 +30,9 @@ blood_type_match(o, R):- blood_type(R).
 % Given a recipient (ID), return list of compatible kidney IDs based on blood type
 % matching_blood_type_ID(RecipientID, KidneyID)
 matching_blood_type_ID(RecipientID, KidneyID):- 
-prop(RecipientID,recipient_blood_type, R),
-prop(KidneyID, donor_blood_type, D), 
-blood_type_match(D,R).
+	prop(RecipientID,recipient_blood_type, R),
+	prop(KidneyID, donor_blood_type, D), 
+	blood_type_match(D,R).
 
 
 % Section B: Create the ranking of kidneys for each recipient.
@@ -40,8 +40,8 @@ blood_type_match(D,R).
 % Given a recipient ID, output list of kidneys that are compatible with
 % the recipient, in descending order of compatibility.
 sort_pairs(RecipientID, KidneyList):- 
-findall(K, kidney_score(RecipientID, K), L),
-rank(L, KidneyList).
+	findall(K, kidney_score(RecipientID, K), L),
+	rank(L, KidneyList).
 
 % In - List of pairs where the pair-key is the score of kidney for the recipient
 %      pair-value is the kidney ID
@@ -62,20 +62,20 @@ pairList_to_KeyList([_-A|T], [A|L]):- pairList_to_KeyList(T, L).
 % Calculate the score of compatible kidney to the recipient
 % Create a pair of score of kidney as key, and kidney ID as value.
 kidney_score(RecipientID, Score-KidneyID):- 
-matching_blood_type_ID(RecipientID, KidneyID),
-kidney_score(RecipientID, KidneyID, Score).
+	matching_blood_type_ID(RecipientID, KidneyID),
+	kidney_score(RecipientID, KidneyID, Score).
 
 % Add up the score to rank kidneys for each recipient.
 kidney_score(RecipientID, KidneyID, S):- 
-hlaMatch_a1(RecipientID, KidneyID, P1),
-hlaMatch_a2(RecipientID, KidneyID, P2),
-hlaMatch_b1(RecipientID, KidneyID, P3),
-hlaMatch_b2(RecipientID, KidneyID, P4),
-hlaMatch_dr1(RecipientID, KidneyID, P5),
-hlaMatch_dr2(RecipientID, KidneyID, P6),
-same_city_match(RecipientID, KidneyID, P7),
-living_donor(KidneyID, P8),
-S is P1+P2+P3+P4+P5+P6+P7+P8.
+	hlaMatch_a1(RecipientID, KidneyID, P1),
+	hlaMatch_a2(RecipientID, KidneyID, P2),
+	hlaMatch_b1(RecipientID, KidneyID, P3),
+	hlaMatch_b2(RecipientID, KidneyID, P4),
+	hlaMatch_dr1(RecipientID, KidneyID, P5),
+	hlaMatch_dr2(RecipientID, KidneyID, P6),
+	same_city_match(RecipientID, KidneyID, P7),
+	living_donor(KidneyID, P8),
+	S is P1+P2+P3+P4+P5+P6+P7+P8.
 
 % http://www.ucdmc.ucdavis.edu/transplant/learnabout/learn_hla_type_match.html
 % https://bethematch.org/patients-and-families/before-transplant/find-a-donor/hla-matching/
@@ -93,111 +93,120 @@ S is P1+P2+P3+P4+P5+P6+P7+P8.
 % hlaMatch(RecipientID, KidneyID, PointsAwarded)
 
 hlaMatch_a1(RecipientID, KidneyID, 1):- 
-prop(RecipientID,recipient_HLA_A1, A),
-prop(KidneyID, donor_HLA_A1, A).
+	prop(RecipientID,recipient_HLA_A1, A),
+	prop(KidneyID, donor_HLA_A1, A).
 
 hlaMatch_a1(RecipientID, KidneyID, 0):- 
-prop(RecipientID,recipient_HLA_A1, A),
-prop(KidneyID, donor_HLA_A1, B),
-dif(A,B).
+	prop(RecipientID,recipient_HLA_A1, A),
+	prop(KidneyID, donor_HLA_A1, B),
+	dif(A,B).
 
 hlaMatch_a2(RecipientID, KidneyID, 1):- 
-prop(RecipientID,recipient_HLA_A2, A),
-prop(KidneyID, donor_HLA_A2, A).
+	prop(RecipientID,recipient_HLA_A2, A),
+	prop(KidneyID, donor_HLA_A2, A).
 
 hlaMatch_a2(RecipientID, KidneyID, 0):- 
-prop(RecipientID,recipient_HLA_A2, A),
-prop(KidneyID, donor_HLA_A2, B),
-dif(A,B).
+	prop(RecipientID,recipient_HLA_A2, A),
+	prop(KidneyID, donor_HLA_A2, B),
+	dif(A,B).
 
 hlaMatch_b1(RecipientID, KidneyID, 1):- 
-prop(RecipientID,recipient_HLA_B1, A),
-prop(KidneyID, donor_HLA_B1, A).
+	prop(RecipientID,recipient_HLA_B1, A),
+	prop(KidneyID, donor_HLA_B1, A).
 
 hlaMatch_b1(RecipientID, KidneyID, 0):- 
-prop(RecipientID,recipient_HLA_B1, A),
-prop(KidneyID, donor_HLA_B1, B),
-dif(A,B).
+	prop(RecipientID,recipient_HLA_B1, A),
+	prop(KidneyID, donor_HLA_B1, B),
+	dif(A,B).
 
 hlaMatch_b2(RecipientID, KidneyID, 1):- 
-prop(RecipientID,recipient_HLA_B2, A),
-prop(KidneyID, donor_HLA_B2, A).
+	prop(RecipientID,recipient_HLA_B2, A),
+	prop(KidneyID, donor_HLA_B2, A).
 
 hlaMatch_b2(RecipientID, KidneyID, 0):- 
-prop(RecipientID,recipient_HLA_B2, A),
-prop(KidneyID, donor_HLA_B2, B),
-dif(A,B).
+	prop(RecipientID,recipient_HLA_B2, A),
+	prop(KidneyID, donor_HLA_B2, B),
+	dif(A,B).
 
 hlaMatch_dr1(RecipientID, KidneyID, 1):- 
-prop(RecipientID,recipient_HLA_DR1, A),
-prop(KidneyID, donor_HLA_DR1, A).
+	prop(RecipientID,recipient_HLA_DR1, A),
+	prop(KidneyID, donor_HLA_DR1, A).
 
 hlaMatch_dr1(RecipientID, KidneyID, 0):- 
-prop(RecipientID,recipient_HLA_DR1, A),
-prop(KidneyID, donor_HLA_DR1, B),
-dif(A,B).
+	prop(RecipientID,recipient_HLA_DR1, A),
+	prop(KidneyID, donor_HLA_DR1, B),
+	dif(A,B).
 
 hlaMatch_dr2(RecipientID, KidneyID, 1):- 
-prop(RecipientID,recipient_HLA_DR2, A),
-prop(KidneyID, donor_HLA_DR2, A).
+	prop(RecipientID,recipient_HLA_DR2, A),
+	prop(KidneyID, donor_HLA_DR2, A).
 
 hlaMatch_dr2(RecipientID, KidneyID, 0):- 
-prop(RecipientID,recipient_HLA_DR2, A),
-prop(KidneyID, donor_HLA_DR2, B),
-dif(A,B).
+	prop(RecipientID,recipient_HLA_DR2, A),
+	prop(KidneyID, donor_HLA_DR2, B),
+	dif(A,B).
 
 % Recipient and donor in same city (+3 points)
 same_city_match(RecipientID, KidneyID, 3):- 
-prop(RecipientID,recipient_city, A),
-prop(KidneyID, donor_city, A).
+	prop(RecipientID,recipient_city, A),
+	prop(KidneyID, donor_city, A).
 
 same_city_match(RecipientID, KidneyID, 0):- 
-prop(RecipientID,recipient_city, A),
-prop(KidneyID, donor_city, B),
-dif(A,B).
+	prop(RecipientID,recipient_city, A),
+	prop(KidneyID, donor_city, B),
+	dif(A,B).
 
 % Living donor? (+2 points)
 % Transplant outcomes are generally better with kidneys from living donors than for kidneys from deceased donors. 
 living_donor(KidneyID, 2):- 
-prop(KidneyID, donor_live, 1).
+	prop(KidneyID, donor_live, 1).
 
 living_donor(KidneyID, 0):- 
-prop(KidneyID, donor_live, 0).
+	prop(KidneyID, donor_live, 0).
 
 % Section C: Assigning kidneys to different recipients based on highest ranking of section A.
 
 % Rank the recipients based on recipient's score.
 % rank_recipients(RecipientsIDList, RankedRecipientsIDList).
 rank_recipients(K, RankedList):- 
-scoreRecipient(K, S),
-rank(S, RankedList).
+	scoreRecipient(K, S),
+	rank(S, RankedList).
 
 
 % Create recipient lists with score.
 % scoreRecipient(RecipientsIDList, ScoreRecipientList).
 scoreRecipient([], []).
 scoreRecipient([H|T], [S-H|L]):-
-recipient_score(H, S),
-scoreRecipient(T, L).
+	recipient_score(H, S),
+	scoreRecipient(T, L).
 
 
 % Calculate the recipient's score to kidneys
 recipient_score(RecipientID, S):- 
-pediatric_recipient(RecipientID, P1),
-once_a_donor(RecipientID, P2),
-pra_match(RecipientID, P3),
-S is P1+P2+P3.
+	pediatric_recipient(RecipientID, P1),
+	once_a_donor(RecipientID, P2),
+	pra_match(RecipientID, P3),
+	S is P1+P2+P3.
 
 % Children under 5 are given priority (+4 points)
 % Patients between age of 5~17 given priority (+2 points)
-pediatric_recipient(RecipientID, 4):- prop(RecipientID, recipient_age, Age), Age < 5.
-pediatric_recipient(RecipientID, 2):- prop(RecipientID, recipient_age, Age), Age > 4, Age < 18.
-pediatric_recipient(RecipientID, 0):- prop(RecipientID, recipient_age, Age), Age > 17.
+pediatric_recipient(RecipientID, 4):- 
+	prop(RecipientID, recipient_age, Age), 
+	Age < 5.
+pediatric_recipient(RecipientID, 2):- 
+	prop(RecipientID, recipient_age, Age), 
+	Age > 4, 
+	Age < 18.
+pediatric_recipient(RecipientID, 0):- 
+	prop(RecipientID, recipient_age, Age), 
+	Age > 17.
 
 
 % recipients who were once a donor given priority (+6 points)
-once_a_donor(RecipientID, 6):- prop(RecipientID, recipient_once_a_donor, 1).
-once_a_donor(RecipientID, 0):- prop(RecipientID, recipient_once_a_donor, 0).
+once_a_donor(RecipientID, 6):- 
+	prop(RecipientID, recipient_once_a_donor, 1).
+once_a_donor(RecipientID, 0):- 
+	prop(RecipientID, recipient_once_a_donor, 0).
 
 % https://en.wikipedia.org/wiki/Panel_reactive_antibody
 % Panel reactive antibody (PRA): 
@@ -210,8 +219,19 @@ once_a_donor(RecipientID, 0):- prop(RecipientID, recipient_once_a_donor, 0).
 % 61% ~ 99% (-1 point)
 % pra_match(RecipientID, Points): calculate points awarded to the recipient
 % based on pra score
-pra_match(RecipientID, 2):- prop(RecipientID, recipient_PRA_percentage, PRA), PRA<11.
-pra_match(RecipientID, 1):- prop(RecipientID, recipient_PRA_percentage, PRA), PRA>10, PRA<31.
-pra_match(RecipientID, 0):- prop(RecipientID, recipient_PRA_percentage, PRA), PRA>30, PRA<61.
-pra_match(RecipientID, -1):- prop(RecipientID, recipient_PRA_percentage, PRA), PRA>60, PRA<100.
+pra_match(RecipientID, 2):- 
+	prop(RecipientID, recipient_PRA_percentage, PRA), 
+	PRA<11.
+pra_match(RecipientID, 1):- 
+	prop(RecipientID, recipient_PRA_percentage, PRA), 
+	PRA>10, 
+	PRA<31.
+pra_match(RecipientID, 0):- 
+	prop(RecipientID, recipient_PRA_percentage, PRA), 
+	PRA>30, 
+	PRA<61.
+pra_match(RecipientID, -1):- 
+	prop(RecipientID, recipient_PRA_percentage, PRA), 
+	PRA>60, 
+	PRA<100.
 
