@@ -37,6 +37,46 @@ blood_type_match(D,R).
 
 % Section B: Create the ranking of kidneys for each recipient.
 
+% Given a recipient ID, output list of kidneys that are compatible with
+% the recipient, in descending order of compatibility.
+sort_pairs(RecipientID, KidneyList):- 
+findall(K, kidney_score(RecipientID, K), L),
+rank(L, KidneyList).
+
+% In - List of pairs where the pair-key is the score of kidney for the recipient
+%      pair-value is the kidney ID
+% KeyList - List of kidney IDs in descending order of kidney score.
+% Ranks the kidneys according to score, then produce a ranked list without the score.
+rank(In, RankedList):-
+    sort(0, @>=, In, Out),
+    pairList_to_KeyList(Out, RankedList).
+
+
+% extract just the values of list.
+% pairList_to_KeyList(PairList, List).
+% PairList - List of pairs.
+% List - same list as PairList in same order, with the keys taken out.
+pairList_to_KeyList([], []).
+pairList_to_KeyList([_-A|T], [A|L]):- pairList_to_KeyList(T, L).
+
+% Calculate the score of compatible kidney to the recipient
+% Create a pair of score of kidney as key, and kidney ID as value.
+kidney_score(RecipientID, Score-KidneyID):- 
+matching_blood_type_ID(RecipientID, KidneyID),
+kidney_score(RecipientID, KidneyID, Score).
+
+% Add up the score to rank kidneys for each recipient.
+kidney_score(RecipientID, KidneyID, S):- 
+hlaMatch_a1(RecipientID, KidneyID, P1),
+hlaMatch_a2(RecipientID, KidneyID, P2),
+hlaMatch_b1(RecipientID, KidneyID, P3),
+hlaMatch_b2(RecipientID, KidneyID, P4),
+hlaMatch_dr1(RecipientID, KidneyID, P5),
+hlaMatch_dr2(RecipientID, KidneyID, P6),
+same_city_match(RecipientID, KidneyID, P7),
+living_donor(KidneyID, P8),
+S is P1+P2+P3+P4+P5+P6+P7+P8.
+
 % http://www.ucdmc.ucdavis.edu/transplant/learnabout/learn_hla_type_match.html
 % https://bethematch.org/patients-and-families/before-transplant/find-a-donor/hla-matching/
 % DR antigens: https://en.wikipedia.org/wiki/HLA-DR
@@ -50,24 +90,7 @@ blood_type_match(D,R).
 
 % Every person has two A, two B, and two DR antigens inheritted from the parents.
 % Each match of antigen with donor (+1 point)
-% hlaMatch(RecipientID, KidneyID, Points)
-
-%findall(K, rank_kidney(recipient_8, K), L), keysort(L, Sorted).
-rank_kidney(RecipientID, Score-KidneyID):- 
-matching_blood_type_ID(RecipientID, KidneyID),
-score(RecipientID, KidneyID, Score).
-
-% Add up the score to rank kidneys for each recipient.
-score(RecipientID, KidneyID, S):- 
-hlaMatch_a1(RecipientID, KidneyID, P1),
-hlaMatch_a2(RecipientID, KidneyID, P2),
-hlaMatch_b1(RecipientID, KidneyID, P3),
-hlaMatch_b2(RecipientID, KidneyID, P4),
-hlaMatch_dr1(RecipientID, KidneyID, P5),
-hlaMatch_dr2(RecipientID, KidneyID, P6),
-same_city_match(RecipientID, KidneyID, P7),
-living_donor(KidneyID, P8),
-S is P1+P2+P3+P4+P5+P6+P7+P8.
+% hlaMatch(RecipientID, KidneyID, PointsAwarded)
 
 hlaMatch_a1(RecipientID, KidneyID, 1):- 
 prop(RecipientID,recipient_HLA_A1, A),
@@ -143,18 +166,40 @@ prop(KidneyID, donor_live, 0).
 
 % Section C: Assigning kidneys to different recipients based on highest ranking of section A.
 
+% Rank the recipients based on recipient's score.
+
+
+% Calculate the recipient's score to kidneys
+recipient_score(RecipientID, S):- 
+pediatric_recipient(RecipientID, P1),
+once_a_donor(RecipientID, P2),
+pra_match(RecipientID, P3),
+S is P1+P2+P3.
+
 % Children under 5 are given priority (+4 points)
 % Patients between age of 5~17 given priority (+2 points)
+pediatric_recipient(RecipientID, 4):- prop(RecipientID, recipient_age, Age), Age < 5.
+pediatric_recipient(RecipientID, 2):- prop(RecipientID, recipient_age, Age), Age > 4, Age < 18.
+pediatric_recipient(RecipientID, 0):- prop(RecipientID, recipient_age, Age), Age > 17.
 
 
 % recipients who were once a donor given priority (+6 points)
-
+once_a_donor(RecipientID, 6):- prop(RecipientID, recipient_once_a_donor, 1).
+once_a_donor(RecipientID, 0):- prop(RecipientID, recipient_once_a_donor, 0).
 
 % https://en.wikipedia.org/wiki/Panel_reactive_antibody
 % Panel reactive antibody (PRA): 
 % An immunological test that estimates the percentage of donors with whom a particular recipient would be incompatible.
 % A high PRA means that the recipient's immune system is likely going to reject most donor organs.
 % The PRA score is between 0% and 99%. 
-
-
+% 0% ~ 10% (+2 points)
+% 11% ~ 30% (+1 points)
+% 31% ~ 60% (0 point)
+% 61% ~ 99% (-1 point)
+% pra_match(RecipientID, Points): calculate points awarded to the recipient
+% based on pra score
+pra_match(RecipientID, 2):- prop(RecipientID, recipient_PRA_percentage, PRA), PRA<11.
+pra_match(RecipientID, 1):- prop(RecipientID, recipient_PRA_percentage, PRA), PRA>10, PRA<31.
+pra_match(RecipientID, 0):- prop(RecipientID, recipient_PRA_percentage, PRA), PRA>30, PRA<61.
+pra_match(RecipientID, -1):- prop(RecipientID, recipient_PRA_percentage, PRA), PRA>60, PRA<100.
 
