@@ -37,6 +37,51 @@ matching_blood_type_ID(RecipientID, KidneyID):-
 
 % Section B: Create the ranking of kidneys for each recipient.
 
+% recipient-kidneys dictionary. Using difference list.
+% rk_dic(RecipientIDList, R1, R2), where R1 and R2 is the dictionary.
+% rk_dic([recipient_1, recipient_2, recipient_3], dic{}, R).
+rk_dic([], R, R).
+rk_dic([H|T], R1, _):- 
+	R1.put([H=[1,2,3]]),
+	rk_dic(T, R1, _).
+
+match(OutputPairList):-
+	findall(ID, recipient(ID), R),
+	rank_recipients(R,Ranked),
+	findall(E, kidney(E), L),
+	match(Ranked, L ,OutputPairList).
+
+delete1(A, [A|B], B).
+delete1(A, [B, C|D], [B|E]) :-
+	delete1(A, [C|D], E).
+
+% match(RankedRecipientIDList, ListOfAvailableKidneys, matchedPairList).
+match([], _, []).
+match(_, [], []).
+match([H|T], R, L):- 
+	sort_pairs(H, P),
+	find_kidney(P, R, K),
+	member(K, R),
+	delete1(K, R, R1),
+	match(T, R1, L1),
+	append([H-K], L1, L).
+
+match([H|T], R, L):- 
+	sort_pairs(H, P),
+	find_kidney(P, R, K),
+	\+ member(K, R),
+	match(T, R, L).
+
+% find_kidney(ListOfRankedWantedKidneys, ListOfAvailableKidneys, foundKidney).
+find_kidney([], _, null).
+find_kidney(_, [], null).
+find_kidney([H|_], R, H):- 
+	member(H, R).
+find_kidney([H|L], R, K):- 
+	\+ member(H, R),
+	find_kidney(L, R, K).
+
+
 % Given a recipient ID, output list of kidneys that are compatible with
 % the recipient, in descending order of compatibility.
 sort_pairs(RecipientID, KidneyList):- 
