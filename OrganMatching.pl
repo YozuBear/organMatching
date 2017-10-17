@@ -247,7 +247,7 @@ match(OutputPairList):-
 	findall(ID, recipient(ID), R),
 	rank_recipients(R,Ranked),
 	findall(E, kidney(E), L),
-	match(Ranked, L ,OutputPairList).
+	once(match(Ranked, L ,OutputPairList)).
 
 % match(RankedRecipientIDList, ListOfAvailableKidneys, matchedPairList).
 % helper function for match(OutputPairList).
