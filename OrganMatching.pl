@@ -27,7 +27,7 @@ blood_type_match(D,ab):- blood_type(D).
 % donor with blood type O is universal donor.
 blood_type_match(o, R):- blood_type(R).
 
-% Given a recipient (ID), return list of compatible kidney IDs based on blood type
+% Given a recipient ID, return list of compatible kidney IDs based on blood type
 % matching_blood_type_ID(RecipientID, KidneyID)
 matching_blood_type_ID(RecipientID, KidneyID):- 
 	prop(RecipientID,recipient_blood_type, R),
@@ -36,51 +36,7 @@ matching_blood_type_ID(RecipientID, KidneyID):-
 
 
 % Section B: Create the ranking of kidneys for each recipient.
-
-% recipient-kidneys dictionary. Using difference list.
-% rk_dic(RecipientIDList, R1, R2), where R1 and R2 is the dictionary.
-% rk_dic([recipient_1, recipient_2, recipient_3], dic{}, R).
-rk_dic([], R, R).
-rk_dic([H|T], R1, _):- 
-	R1.put([H=[1,2,3]]),
-	rk_dic(T, R1, _).
-
-match(OutputPairList):-
-	findall(ID, recipient(ID), R),
-	rank_recipients(R,Ranked),
-	findall(E, kidney(E), L),
-	match(Ranked, L ,OutputPairList).
-
-delete1(A, [A|B], B).
-delete1(A, [B, C|D], [B|E]) :-
-	delete1(A, [C|D], E).
-
-% match(RankedRecipientIDList, ListOfAvailableKidneys, matchedPairList).
-match([], _, []).
-match(_, [], []).
-match([H|T], R, L):- 
-	sort_pairs(H, P),
-	find_kidney(P, R, K),
-	member(K, R),
-	delete1(K, R, R1),
-	match(T, R1, L1),
-	append([H-K], L1, L).
-
-match([H|T], R, L):- 
-	sort_pairs(H, P),
-	find_kidney(P, R, K),
-	\+ member(K, R),
-	match(T, R, L).
-
-% find_kidney(ListOfRankedWantedKidneys, ListOfAvailableKidneys, foundKidney).
-find_kidney([], _, null).
-find_kidney(_, [], null).
-find_kidney([H|_], R, H):- 
-	member(H, R).
-find_kidney([H|L], R, K):- 
-	\+ member(H, R),
-	find_kidney(L, R, K).
-
+% The kidneys from Section A are used. (The donor kidneys which match the blood type of recipient).
 
 % Given a recipient ID, output list of kidneys that are compatible with
 % the recipient, in descending order of compatibility.
@@ -209,9 +165,7 @@ living_donor(KidneyID, 2):-
 living_donor(KidneyID, 0):- 
 	prop(KidneyID, donor_live, 0).
 
-% Section C: Assigning kidneys to different recipients based on highest ranking of section A.
-
-% Rank the recipients based on recipient's score.
+% Section C: Rank the recipients based on recipient's priority score points.
 % rank_recipients(RecipientsIDList, RankedRecipientsIDList).
 rank_recipients(K, RankedList):- 
 	scoreRecipient(K, S),
@@ -226,12 +180,17 @@ scoreRecipient([H|T], [S-H|L]):-
 	scoreRecipient(T, L).
 
 
-% Calculate the recipient's score to kidneys
+% Calculate the recipient's priority score
+% RecipientID - the ID of recipient
+% S - the priority score of the given recipient
 recipient_score(RecipientID, S):- 
 	pediatric_recipient(RecipientID, P1),
 	once_a_donor(RecipientID, P2),
 	pra_match(RecipientID, P3),
 	S is P1+P2+P3.
+
+
+% Following are rubrics used to calculate recipients' priority score.
 
 % Children under 5 are given priority (+4 points)
 % Patients between age of 5~17 given priority (+2 points)
@@ -245,7 +204,6 @@ pediatric_recipient(RecipientID, 2):-
 pediatric_recipient(RecipientID, 0):- 
 	prop(RecipientID, recipient_age, Age), 
 	Age > 17.
-
 
 % recipients who were once a donor given priority (+6 points)
 once_a_donor(RecipientID, 6):- 
@@ -280,3 +238,54 @@ pra_match(RecipientID, -1):-
 	PRA>60, 
 	PRA<100.
 
+
+% Section D: match recipients to kidneys based on highest ranking of section B and C.
+
+% Match recipients and kidneys in the database, output is a pair list
+% in the form of recipientID-kidneyID
+match(OutputPairList):-
+	findall(ID, recipient(ID), R),
+	rank_recipients(R,Ranked),
+	findall(E, kidney(E), L),
+	match(Ranked, L ,OutputPairList).
+
+% match(RankedRecipientIDList, ListOfAvailableKidneys, matchedPairList).
+% helper function for match(OutputPairList).
+% RankedRecipientIDList - a list containing all recipient IDs. It's ranked
+% 					      in descending order, with highest priority recipient
+%                         as its head.
+% ListOfAvailableKidneys - IDs of all the kidneys from database.
+% matchedPairList - the returned list of pairs of matched recipientID-kidneyID
+match([], _, []).
+match(_, [], []).
+match([H|T], R, L):- 
+	sort_pairs(H, P),
+	find_kidney(P, R, K),
+	member(K, R),
+	delete1(K, R, R1),
+	match(T, R1, L1),
+	append([H-K], L1, L).
+match([H|T], R, L):- 
+	sort_pairs(H, P),
+	find_kidney(P, R, K),
+	\+ member(K, R),
+	match(T, R, L).
+
+% find_kidney(ListOfRankedWantedKidneys, ListOfAvailableKidneys, FoundKidney).
+% FoundKidney - return the highest ranked kidney from ListOfRankedWantedKidneys
+% that is a member of ListOfAvailableKidneys.
+find_kidney([], _, null).
+find_kidney(_, [], null).
+find_kidney([H|_], R, H):- 
+	member(H, R).
+find_kidney([H|L], R, K):- 
+	\+ member(H, R),
+	find_kidney(L, R, K).
+
+
+% prolog default library doesn't work, using following delete instead.
+% http://eclipseclp.org/doc/bips/lib/lists/delete-3.html
+% delete1(A,B,C) where listC is listB - elementA.
+delete1(A, [A|B], B).
+delete1(A, [B, C|D], [B|E]) :-
+	delete1(A, [C|D], E).
