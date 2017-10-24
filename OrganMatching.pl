@@ -1,5 +1,5 @@
-% Section A: create a list of matching kidneys to patients based on blood type.
-% Blood type must match
+% Section A: Create a list of matching kidneys to patients based on blood type.
+% Blood type must match.
 % Blood matching: http://www.ucdmc.ucdavis.edu/transplant/livingdonation/donor_compatible.html
 % If your blood type is: 	You can donate to these blood types:
 % 	TYPE O					TYPE O, A, B, AB
@@ -13,26 +13,68 @@ blood_type(b).
 blood_type(ab).
 blood_type(o).
 
-% blood_type_match(D,R).
-% Where D is the blood type of donor, R is blood type of recipient.
+% blood_type_match(D,R) is true when D, the blood type of the donor, can be donated or matched with R,
+%   the blood type of the recipient.
 
-% same blood type always match
+% The same blood type always match.
 % blood_type_match(A,A):- blood_type(A).  % to avoid overlapping results
 blood_type_match(a,a).
 blood_type_match(b,b).
 
-% recipient with blood type AB is universal recipient
+% Recipient with blood type AB is universal recipient.
 blood_type_match(D,ab):- blood_type(D).
 
-% donor with blood type O is universal donor.
+% Donor with blood type O is universal donor.
 blood_type_match(o, R):- blood_type(R).
 
-% Given a recipient ID, return list of compatible kidney IDs based on blood type
-% matching_blood_type_ID(RecipientID, KidneyID)
+
+% Test cases for blood_type_match(D,R).
+% Return true for same D and R blood types:
+% ?- blood_type_match(a,a).
+% ?- blood_type_match(b,b).
+% ?- blood_type_match(o,o).
+% ?- blood_type_match(ab,ab).
+
+% Return true when R blood type is ab and D blood type is any other blood type.
+% ?- blood_type_match(a,ab).
+% ?- blood_type_match(b,ab).
+% ?- blood_type_match(o,ab).
+
+% Return false when D blood type is ab but R blood type is not ab.
+% ?- blood_type_match(ab,a).
+% ?- blood_type_match(ab,b).
+% ?- blood_type_match(ab,c).
+
+% Return true when D blood type is o and R blood type is any other blood type.
+% ?- blood_type_match(o,a).
+% ?- blood_type_match(o,b).
+% ?- blood_type_match(o,ab).
+
+% Return false when R blood type is o but D blood type is not o.
+% ?- blood_type_match(a,o).
+% ?- blood_type_match(b,o).
+% ?- blood_type_match(ab,o).
+
+
+
+% Given a recipient ID, return list of compatible kidney IDs based on blood type.
+% matching_blood_type_ID(RecipientID, KidneyID) is true when the blood type of the recipient, identified by a
+%   unique RecipientID, matches the blood type of a kidney identified by the KidneyID.
+
 matching_blood_type_ID(RecipientID, KidneyID):- 
 	prop(RecipientID,recipient_blood_type, R),
 	prop(KidneyID, donor_blood_type, D), 
 	blood_type_match(D,R).
+
+
+% Sample test cases for matching_blood_type_ID(RecipientID, KidneyID).
+% Return true when the recipient blood type matches the blood type of the donor kidney.
+% ?- matching_blood_type_ID(recipient_2, kidney_4).
+% ?- matching_blood_type_ID(recipient_2, kidney_3).
+
+% Return false when the recipient blood type and the blood type of the donor kidney do not match.
+% ?- matching_blood_type_ID(recipient_1, kidney_1).
+% ?- matching_blood_type_ID(recipient_2, kidney_1).
 
 
 % Section B: Create the ranking of kidneys for each recipient.
