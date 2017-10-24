@@ -297,8 +297,21 @@ match(OutputPairList):-
 	findall(E, kidney(E), L),
 	once(match(Ranked, L ,OutputPairList)).
 
+
+
+% Test case:
+%?- match(X).
+% Note: output list may be too long so Prolog may not show the whole list. So run the following two below:
+% (Query returns a pair list that matches a kidney with its highest ranked recipient based on the whole test
+%   data; expected output should match the answer in expected matching output.txt)
+%
+%?- set_prolog_flag(answer_write_options,[max_depth(0)]).
+%?- match(X).
+
+
+% Helper functions for match(OutputPairList) below:
+
 % match(RankedRecipientIDList, ListOfAvailableKidneys, matchedPairList).
-% helper function for match(OutputPairList).
 % RankedRecipientIDList - a list containing all recipient IDs. It's ranked
 % 					      in descending order, with highest priority recipient
 %                         as its head.
