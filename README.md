@@ -1,4 +1,4 @@
-# organMatching
+# kidneyMatching
 
 ==Organ Matching==
 Authors: Yu Ju Liang, Trisha Huang.
@@ -7,7 +7,7 @@ Authors: Yu Ju Liang, Trisha Huang.
 
 Each year, many patients are put on the waitlist for organ transplants. To find a matching organ for each patient, we must consider blood type, cell antigen type (also known as human leukocyte antigen, abbreviated as HLA), and whether the donor organ and the recipient are in the same city. These factors are weighted differently due to the nature of organ transplant. For example, the organ donor’s blood type must match with that of the recipient’s; therefore, it has higher priority than whether the location of the organ and patient are in the same city. 
 
-Organ Matching finds a list of matching kidneys from the database for a patient, then ranks them based on the criteria listed above. If the core criteria is not matched (e.g. blood type and cell antigen type), then rather than having a low ranking matching, the matching will  not be on the list.
+Kidney Matching finds a list of matching kidneys from the database for a patient, then ranks them based on the criteria listed above. If the core criteria is not matched (e.g. blood type and cell antigen type), then rather than having a low ranking matching, the matching will  not be on the list.
 
 Donor organ attributes:
 ID, city, blood type, HLA_A1, HLA_A2, HLA_B1, HLA_B2, HLA_DR1, HLA_DR2, living donor
@@ -31,8 +31,8 @@ Matching rubric: https://paireddonation.org/about-us/algorithm/
 
 ===What is the something extra?===
 
-Organ Matching not only searches for matching organs, it also ranks them based on a weighted scheme.
-    Organ Matching also assigns organs to a list of patients based on their highest ranking.    
+Kidney Matching not only searches for matching kidneys, it also ranks them based on a weighted scheme.
+    Kidney Matching also assigns kidneys to a list of patients based on their highest ranking.    
 
 ===What did we learn from doing this?===
 
