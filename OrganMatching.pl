@@ -88,6 +88,12 @@ sort_pairs(RecipientID, KidneyList):-
 	findall(K, kidney_score(RecipientID, K), L),
 	rank(L, KidneyList).
 
+% Sample query:
+% X = ordered list of kidneys ranked in terms of compatibility with the recipient.
+% ?- sort_pairs(recipient_1, X).
+
+
+
 % In - List of pairs where the pair-key is the score of kidney for the recipient
 %      pair-value is the kidney ID
 % KeyList - List of kidney IDs in descending order of kidney score.
@@ -104,11 +110,18 @@ rank(In, RankedList):-
 pairList_to_KeyList([], []).
 pairList_to_KeyList([_-A|T], [A|L]):- pairList_to_KeyList(T, L).
 
+
 % Calculate the score of compatible kidney to the recipient
 % Create a pair of score of kidney as key, and kidney ID as value.
 kidney_score(RecipientID, Score-KidneyID):- 
 	matching_blood_type_ID(RecipientID, KidneyID),
 	kidney_score(RecipientID, KidneyID, Score).
+
+% Sample query:
+% X = kidneys with matching blood type with the kidney_score attached in front
+% ?- kidney_score(recipient_1, X).
+
+
 
 % Add up the score to rank kidneys for each recipient.
 kidney_score(RecipientID, KidneyID, S):- 
@@ -121,6 +134,15 @@ kidney_score(RecipientID, KidneyID, S):-
 	same_city_match(RecipientID, KidneyID, P7),
 	living_donor(KidneyID, P8),
 	S is P1+P2+P3+P4+P5+P6+P7+P8.
+
+
+% Sample test query:
+% Expect no hlaMatch but recipient_1 and kidney_1 are in the same city so +3 points and kidney_1 is
+%   from a live donor so +2 points, so total X = 5.
+% ?- kidney_score(recipient_1, kidney_1, X).
+
+
+% Criteria for ranking kidneys:
 
 % References for HLA matching:
 % http://www.ucdmc.ucdavis.edu/transplant/learnabout/learn_hla_type_match.html
@@ -193,7 +215,17 @@ hlaMatch_dr2(RecipientID, KidneyID, 0):-
 	prop(KidneyID, donor_HLA_DR2, B),
 	dif(A,B).
 
-% Recipient and donor in same city (+3 points)
+
+% Sample test cases for hlaMatch:
+% Expect true for recipient_1 and kidney_1 have different HLA_A1.
+% ?- hlaMatch_a1(recipient_1, kidney_1, 0).
+% Expect true for recipient_26 and kidney_9 have the same HLA_DR1.
+% ?- hlaMatch_dr1(recipient_26, kidney_9, 1).
+
+
+
+% If the recipient and donor are in the same city, +3 points. Otherwise, if they are in different
+%   cities, +0 points.
 same_city_match(RecipientID, KidneyID, 3):- 
 	prop(RecipientID,recipient_city, A),
 	prop(KidneyID, donor_city, A).
@@ -203,13 +235,31 @@ same_city_match(RecipientID, KidneyID, 0):-
 	prop(KidneyID, donor_city, B),
 	dif(A,B).
 
+% Sample test cases for same_city_match:
+% Expect true for recipient_1 and kidney_1 are both located in Vancouver.
+% ?- same_city_match(recipient_1, kidney_1, 3).
+% Expect true for recipient_1 and kidney_8 are located in different cities (kidney_8 is located in Surrey).
+% ?- same_city_match(recipient_1, kidney_8, 0).
+
+
+
 % Living donor? (+2 points)
-% Transplant outcomes are generally better with kidneys from living donors than for kidneys from deceased donors. 
+% Transplant outcomes are generally better with kidneys from living donors than for kidneys from deceased donors.
+% If kidney is from a live donor, +2 points.
+% If kidney is not from a live donor, +0 points.
+
 living_donor(KidneyID, 2):- 
 	prop(KidneyID, donor_live, 1).
 
 living_donor(KidneyID, 0):- 
 	prop(KidneyID, donor_live, 0).
+
+
+% Sample test cases for living_donor:
+% Expect true for kidney_1 is from a living donor.
+% ?- living_donor(kidney_1,2).
+% Expect true for kidney_2 is not from a living donor.
+% ?- living_donor(kidney_2, 0).
 
 
 
