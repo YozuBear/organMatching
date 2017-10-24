@@ -214,13 +214,14 @@ living_donor(KidneyID, 0):-
 
 
 % Section C: Rank the recipients based on recipient's priority score points.
+% RankedRecipientsIDList is the RecipientsIDList sorted according to each recipient's priority score.
 % rank_recipients(RecipientsIDList, RankedRecipientsIDList).
 rank_recipients(K, RankedList):- 
 	scoreRecipient(K, S),
 	rank(S, RankedList).
 
 
-% Create recipient lists with score.
+% Create a recipient list where each recipient is scored based on the recipient's priority.
 % scoreRecipient(RecipientsIDList, ScoreRecipientList).
 scoreRecipient([], []).
 scoreRecipient([H|T], [S-H|L]):-
@@ -228,7 +229,8 @@ scoreRecipient([H|T], [S-H|L]):-
 	scoreRecipient(T, L).
 
 
-% Calculate the recipient's priority score
+% Calculate the recipient's priority score based on the rubrics described below (age, once_a_donor, and 
+%   PRA percentage).
 % RecipientID - the ID of recipient
 % S - the priority score of the given recipient
 recipient_score(RecipientID, S):- 
@@ -237,11 +239,19 @@ recipient_score(RecipientID, S):-
 	pra_match(RecipientID, P3),
 	S is P1+P2+P3.
 
+% Sample test queries for recipient_score:
+%Expected: recipient_30 is 1 year old, so that's +4 points for being a pediatric patient, is never once a 
+%   a donor, so that's +0 points, and has a PRA percentage of 26, so that's +1 point; in total, X = 5.
+% ?- recipient_score(recipient_30, X).
+
 
 % Following are rubrics used to calculate recipients' priority score.
 
+
 % Children under 5 are given priority (+4 points)
 % Patients between age of 5~17 given priority (+2 points)
+% Patients older than 17 do not gain priority points based on age.
+
 pediatric_recipient(RecipientID, 4):- 
 	prop(RecipientID, recipient_age, Age), 
 	Age < 5.
@@ -253,11 +263,33 @@ pediatric_recipient(RecipientID, 0):-
 	prop(RecipientID, recipient_age, Age), 
 	Age > 17.
 
-% recipients who were once a donor given priority (+6 points)
+% Sample test queries for pediatric_recipient:
+% Expected: recipient_30 is only 1 year old so X = 4.
+% ?- pediatric_recipient(recipient_30, X).
+% Expected: recipient_9 is age 15 so X = 2.
+% ?- pediatric_recipient(recipient_9, X).
+% Expected: recipient_13 is age 32 so X = 0.
+% ?- pediatric_recipient(recipient_13, X).
+
+
+
+% Recipients who were once a donor are given priority (+6 points), while recipients who were never a
+%   donor do not gain any priority points.
 once_a_donor(RecipientID, 6):- 
 	prop(RecipientID, recipient_once_a_donor, 1).
 once_a_donor(RecipientID, 0):- 
 	prop(RecipientID, recipient_once_a_donor, 0).
+
+
+% Sample test queries for once_a_donor:
+% Expected: recipient_19 was once a donor so X = 6.
+% ?- once_a_donor(recipient_19, X).
+% Expected: recipient_30 was not a donor so X = 0.
+% ?- once_a_donor(recipient_30, X).
+
+
+
+
 
 % Reference: https://en.wikipedia.org/wiki/Panel_reactive_antibody
 % Panel reactive antibody (PRA): 
@@ -270,6 +302,11 @@ once_a_donor(RecipientID, 0):-
 % 61% ~ 99% (-1 point)
 % pra_match(RecipientID, Points): calculate points awarded to the recipient
 % based on pra score
+%       2 points for PRA percentage < 11%
+%       1 point for PRA percentage from 11% to 30%
+%       0 points for PRA percentage from 31% to 60%
+%       -1 points for PRA percentage from 61% to 99%
+
 pra_match(RecipientID, 2):- 
 	prop(RecipientID, recipient_PRA_percentage, PRA), 
 	PRA<11.
@@ -287,6 +324,14 @@ pra_match(RecipientID, -1):-
 	PRA<100.
 
 
+% Sample test queries for pra_match:
+% Expected: recipient_30 has recipient_PRA_percentage of 26, so he should get 1 point.
+% ?- pra_match(recipient_30, X).
+% Expected: recipient_16 has recipient_PRA_percentage of 90, so he should get -1 point.
+% ?- pra_match(recipient_16, X).
+
+
+
 % Section D: match recipients to kidneys based on highest ranking of section B and C.
 
 % Match recipients and kidneys in the database, output is a pair list
@@ -299,14 +344,15 @@ match(OutputPairList):-
 
 
 
-% Test case:
-%?- match(X).
+% Test query:
+% ?- match(X).
 % Note: output list may be too long so Prolog may not show the whole list. So run the following two below:
-% (Query returns a pair list that matches a kidney with its highest ranked recipient based on the whole test
-%   data; expected output should match the answer in expected matching output.txt)
+% (Query returns a pair list that matches a kidney with its highest ranked matched recipient based on
+%   the whole test data; expected output should match the answer in expected matching output.txt)
 %
-%?- set_prolog_flag(answer_write_options,[max_depth(0)]).
-%?- match(X).
+% ?- set_prolog_flag(answer_write_options,[max_depth(0)]).
+% ?- match(X).
+
 
 
 % Helper functions for match(OutputPairList) below:
