@@ -36,7 +36,7 @@ Kidney Matching not only searches for matching kidneys, it also ranks them based
 
 ===What did we learn from doing this?===
 
-Prolog is very suitable for matching problems. 
+Prolog is very suitable for solving matching problems. Logic programming is excellent at setting the matching rules by defining relations and other criteria like how to calculate the weighted scheme specified in the problem domain.  
 
 At first, we were overly ambitious and considered including more than one organ type in the organ matching problem. For example, other organs that can be donated for transplants include the heart, lungs, liver, pancreas, and the intestines. However, we found that there are many criteria to consider for matching just one organ type to a recipient. While blood type and HLA are the core criteria for matching all donor organs to recipients, different organs have additional criteria to consider. For example, before a lung transplant can be considered, the body sizes of the lung transplant donor and the recipient must be similar so that the donated lobe of lung can fit inside the chest cavity of the recipient (reference for lung transplant: https://my.clevelandclinic.org/health/articles/lung-transplant-finding-an-organ-donor). 
 
