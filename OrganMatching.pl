@@ -77,8 +77,10 @@ matching_blood_type_ID(RecipientID, KidneyID):-
 % ?- matching_blood_type_ID(recipient_2, kidney_1).
 
 
+
+
 % Section B: Create the ranking of kidneys for each recipient.
-% The kidneys from Section A are used. (The donor kidneys which match the blood type of recipient).
+% The kidneys from Section A are used. (The donor kidneys which match the blood type of the recipient).
 
 % Given a recipient ID, output list of kidneys that are compatible with
 % the recipient, in descending order of compatibility.
@@ -120,16 +122,18 @@ kidney_score(RecipientID, KidneyID, S):-
 	living_donor(KidneyID, P8),
 	S is P1+P2+P3+P4+P5+P6+P7+P8.
 
+% References for HLA matching:
 % http://www.ucdmc.ucdavis.edu/transplant/learnabout/learn_hla_type_match.html
 % https://bethematch.org/patients-and-families/before-transplant/find-a-donor/hla-matching/
 % DR antigens: https://en.wikipedia.org/wiki/HLA-DR
+
 % HLA (human leukocyte antigens)Tissue typing: 
 % High antigen matching improves the chances for a successful transplant 
 % by helping donor cells engraft (make new blood cells) and reduce the risks of immune cells from 
 % the donated organ cells (the graft) attack the recipient’s cells.
-% A, B, DR antigens are the most relevant for renal transplant
-% There are 78 types of DR antigens, will use the common 28 antigens here for simplicity.
-% There are more than 2000 known allels for type A antigens, for simplicity, use 100 for both A and B.
+% A, B, and DR antigens are the most relevant for renal transplant.
+% There are 78 types of DR antigens, but we will use the common 28 antigens here for simplicity.
+% There are more than 2000 known alleles for type A antigens, but for simplicity, we will use use 100 for both A and B.
 
 % Every person has two A, two B, and two DR antigens inheritted from the parents.
 % Each match of antigen with donor (+1 point)
@@ -207,6 +211,8 @@ living_donor(KidneyID, 2):-
 living_donor(KidneyID, 0):- 
 	prop(KidneyID, donor_live, 0).
 
+
+
 % Section C: Rank the recipients based on recipient's priority score points.
 % rank_recipients(RecipientsIDList, RankedRecipientsIDList).
 rank_recipients(K, RankedList):- 
@@ -253,7 +259,7 @@ once_a_donor(RecipientID, 6):-
 once_a_donor(RecipientID, 0):- 
 	prop(RecipientID, recipient_once_a_donor, 0).
 
-% https://en.wikipedia.org/wiki/Panel_reactive_antibody
+% Reference: https://en.wikipedia.org/wiki/Panel_reactive_antibody
 % Panel reactive antibody (PRA): 
 % An immunological test that estimates the percentage of donors with whom a particular recipient would be incompatible.
 % A high PRA means that the recipient's immune system is likely going to reject most donor organs.
