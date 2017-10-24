@@ -1,6 +1,6 @@
 # kidneyMatching
 
-==Organ Matching==
+==Kidney Matching==
 Authors: Yu Ju Liang, Trisha Huang.
 
 ===What is the problem?===
